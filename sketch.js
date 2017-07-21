@@ -21,7 +21,7 @@ function setup() {
 }
 
 function draw() {
-  background(0); // clear the old symbols
+  background(0, 150); // clear the old symbols, add opacity, this opacity lets some of the previous frame show through thus causing a blur/mush effect!
   myStreams.forEach(function(stream) {
     stream.render();
   });
@@ -29,12 +29,13 @@ function draw() {
 // END MAIN
 
 
-function Symbol(x, y, speed) {
+function Symbol(x, y, speed, first) {
   this.x = x;
   this.y = y;
   this.value;
   this.speed = speed;
   this.switchInterval = round(random(2,30));
+  this.first = first;
 
   this.setToRandomSymbol = function() {
     if (frameCount % this.switchInterval == 0) {
@@ -56,18 +57,23 @@ function Stream() {
   this.speed = random(5,11);
 
   this.generateSymbols = function(x, y) {
-
+    var first = round(random(0,4)) == 1; // has the effect of... about 20% of the time the first symbol will be brighter
     for (var i = 0; i <= this.totalSymbols; i++) {
-      symbol = new Symbol(x, y, this.speed);
+      symbol = new Symbol(x, y, this.speed, first);
       symbol.setToRandomSymbol();
       this.symbols.push(symbol);
       y -= symbolSize;
+      first = false;
     }
   }
 
   this.render = function() {
     this.symbols.forEach(function(symbol) {
-      fill(0, 255, 70);
+      if (symbol.first) {
+        fill(180, 255, 180);  // brighter RGB value for first symbol in stream for effect
+      } else {
+        fill(0, 255, 70);
+      }
       text(symbol.value, symbol.x, symbol.y);
       symbol.rain();
       symbol.setToRandomSymbol();
