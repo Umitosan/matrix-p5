@@ -1,9 +1,7 @@
 
-
 var symbolSize = 26;
 var myStreams = [];
 
-// MAIN LOOP
 function setup() {
   createCanvas(
     window.innerWidth,
@@ -21,14 +19,21 @@ function setup() {
   textStyle(BOLD);
 }
 
+// MAIN LOOP
 function draw() {
   background(0, 150); // clear the old symbols, add opacity, this opacity lets some of the previous frame show through thus causing a blur/mush effect!
   myStreams.forEach(stream => {
     stream.render();
     stream.drip(); // moves the streams down the screen
+    // check bounds and destroy if off screen
+    if (stream.inBounds() == false) {
+      console.log("stream out of bounds, will be delete");
+      var index = myStreams.indexOf(stream);
+      myStreams.splice(index, 1);
+    }
   });
 }
-// END MAIN
+
 
 
 function Symbol(x, y, first) {
@@ -50,8 +55,8 @@ function Symbol(x, y, first) {
 
 function Stream() {
   this.symbols = [];
-  this.totalSymbols = round(random(5, 30));
-  this.fallSpeed = round(random(2,40));
+  this.totalSymbols = round(random(6, 30));
+  this.fallSpeed = round(random(2,35));
 
   this.generateSymbols = function(x, y) {
     var first = round(random(0,2)) == 1; // has the effect of... about 20% of the time the first symbol will be brighter
@@ -70,6 +75,16 @@ function Stream() {
         symbol.y += symbolSize;
       });
     }
+  }
+
+  // check the tail symbol to see if on screen
+  this.inBounds = function() {
+    var bounds = true;
+    var tailIndex = this.symbols.length - 3;
+    if (this.symbols[tailIndex].y > window.innerHeight) {
+      bounds = false;
+    }
+    return bounds;
   }
 
   this.render = function() {
